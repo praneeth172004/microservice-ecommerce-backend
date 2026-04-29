@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -87,5 +88,41 @@ public class CartService  {
         cart.getItems().clear();
 
         cartRepository.save(cart);
+    }
+
+    public CartResponse updateCart(UUID userId, UpdateCartItemRequest request) {
+        Cart cart=cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        CartItem cartItem=cart.getItems().stream()
+                .filter((item)->item.getProductId().equals(request.getProductId()))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Product not found in cart"));
+        if (request.getQuantity() <= 0) {
+            cart.getItems().remove(cartItem);
+        }else{
+            cartItem.setQuantity(request.getQuantity());
+        }
+
+        // Option 1: Replace quantity
+
+
+        // Option 2: Increment quantity
+        // cartItem.setQuantity(cartItem.getQuantity() + request.getQuantity());
+
+        Mapper.toCartItemResponse(cartItem);
+        cartRepository.save(cart);
+        return Mapper.toResponse(cart);
+    }
+
+    public CartResponse removeItem(UUID userId,UUID productId){
+        Cart cart=cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        CartItem item=cart.getItems().stream()
+                .filter(i->i.getProductId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Product not found in cart"));
+        cart.getItems().remove(item);
+        cartRepository.save(cart);
+        return Mapper.toResponse(cart);
     }
 }
