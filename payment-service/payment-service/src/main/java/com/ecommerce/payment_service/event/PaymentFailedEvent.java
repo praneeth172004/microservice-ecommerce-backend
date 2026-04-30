@@ -1,4 +1,4 @@
-package com.ecommerce.order_service.event;
+package com.ecommerce.payment_service.event;
 
 import lombok.*;
 

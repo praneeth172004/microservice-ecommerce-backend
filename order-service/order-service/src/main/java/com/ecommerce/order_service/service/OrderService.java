@@ -8,6 +8,7 @@ import com.ecommerce.order_service.entity.Order;
 import com.ecommerce.order_service.entity.OrderEnum.OrderStatus;
 import com.ecommerce.order_service.entity.OrderItem;
 import com.ecommerce.order_service.feing.CartClient;
+import com.ecommerce.order_service.kafka.OrderProducer;
 import com.ecommerce.order_service.mapper.OrderMapper;
 import com.ecommerce.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class OrderService {
     private final CartClient cartClient;
     private final OrderRepository orderRepository;
+    private final OrderProducer orderProducer;
 
     public OrderResponse createOrder(OrderRequest request) {
         CartResponse cart= cartClient.getCart(request.getUserId());
@@ -50,8 +52,12 @@ public class OrderService {
                 .totalAmount(total)
                 .build();
         items.forEach(i -> i.setOrder(order));
-        Order Saved=orderRepository.save(order);
-        return OrderMapper.toResponse(Saved);
+        orderRepository.save(order);
+        orderProducer.sendOrderCreatedEvent(order);
+        Order savedOrder=orderRepository.save(order);
+
+
+        return OrderMapper.toResponse(savedOrder);
 
     }
 

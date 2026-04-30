@@ -1,13 +1,14 @@
-package com.ecommerce.order_service.event;
+package com.ecommerce.payment_service.event;
 
 import lombok.*;
 
 import java.util.UUID;
 
 @Getter
-@Setter @Builder
+@Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaymentFailedEvent {
+public class PaymentSuccessEvent {
     private UUID orderId;
 }
