@@ -5,6 +5,7 @@ import com.ecommerce.productservice.dto.ProductRequest;
 import com.ecommerce.productservice.dto.ProductResponse;
 import com.ecommerce.productservice.dto.UpdateProductRequest;
 import com.ecommerce.productservice.entity.Product;
+import com.ecommerce.productservice.kafka.ProductProduce;
 import com.ecommerce.productservice.repository.ProductRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +22,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final ProductProduce productProduce;
 
     @Transactional
     public ProductResponse AddProduct(ProductRequest product) {
         Product p= ProductMapper.toEntity(product);
         Product product1=productRepository.save(p);
+        productProduce.sendProductEvent(product1);
         return ProductMapper.toResponse(product1);
     }
 

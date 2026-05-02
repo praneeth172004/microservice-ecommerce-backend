@@ -2,6 +2,7 @@ package com.ecommerce.order_service.kafka;
 
 import com.ecommerce.order_service.entity.Order;
 import com.ecommerce.order_service.event.OrderCreatedEvent;
+import com.ecommerce.order_service.event.OrderEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -9,14 +10,22 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class OrderProducer {
-    private final KafkaTemplate<String,OrderCreatedEvent> kafkaTemplate;
+    private final KafkaTemplate<String,OrderEvent> kafkaTemplate;
     public void sendOrderCreatedEvent(Order order){
-        OrderCreatedEvent orderCreatedEvent=OrderCreatedEvent.builder()
+        OrderEvent event = OrderEvent.builder()
                 .orderId(order.getId())
-                .userId(order.getUserId())
-                .amount(order.getTotalAmount())
+                .status("CREATED")
+                .items(order.getItems().stream().map(item -> {
+                    OrderEvent.Item i = new OrderEvent.Item();
+                    i.setProductId(item.getProductId());
+                    i.setQuantity(item.getQuantity());
+                    return i;
+                }).toList())
                 .build();
-        kafkaTemplate.send("order-created-topic",order.getId().toString(),orderCreatedEvent);
-    }
 
+        kafkaTemplate.send("order-event-topic", order.getId().toString(), event);
+    }
+    public void sendOrderEvent(OrderEvent event){
+        kafkaTemplate.send("order-event-topic",event.getOrderId().toString(),event);
+    }
 }

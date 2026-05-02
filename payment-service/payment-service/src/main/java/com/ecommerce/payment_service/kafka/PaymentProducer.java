@@ -15,12 +15,18 @@ public class PaymentProducer {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void sendSuccess(UUID orderId) {
-        kafkaTemplate.send("payment-success-topic",
-                new PaymentSuccessEvent(orderId));
+        kafkaTemplate.send(
+                "payment-success-topic",
+                orderId.toString(),
+                new PaymentSuccessEvent(orderId)
+        );
     }
 
     public void sendFailure(UUID orderId) {
-        kafkaTemplate.send("payment-failed-topic",
-                new PaymentFailedEvent(orderId));
+        kafkaTemplate.send(
+                "payment-failed-topic",
+                orderId.toString(),
+                new PaymentFailedEvent(orderId)
+        );
     }
 }

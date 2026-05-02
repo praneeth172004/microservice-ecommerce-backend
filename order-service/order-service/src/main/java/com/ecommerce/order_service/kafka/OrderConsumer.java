@@ -2,6 +2,7 @@ package com.ecommerce.order_service.kafka;
 
 import com.ecommerce.order_service.entity.Order;
 import com.ecommerce.order_service.entity.OrderEnum.OrderStatus;
+import com.ecommerce.order_service.event.OrderEvent;
 import com.ecommerce.order_service.event.PaymentFailedEvent;
 import com.ecommerce.order_service.event.PaymentSuccessEvent;
 import com.ecommerce.order_service.repository.OrderRepository;
@@ -14,25 +15,34 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderConsumer {
+
     private final OrderRepository orderRepository;
-    @KafkaListener(topics = "payment-success-topic",groupId = "order-group")
-    public void handlePaymentSuccess(PaymentSuccessEvent paymentSuccessEvent) {
-        Order order = orderRepository.findById(paymentSuccessEvent.getOrderId()).orElse(null);
-        if(order.getStatus()== OrderStatus.PAID){
-            return;
+    private final OrderProducer orderProducer;
+
+    @KafkaListener(topics = "inventory_events", groupId = "order-group") // ✅ FIXED
+    public void handleInventory(OrderEvent event) {
+
+        Order order = orderRepository.findById(event.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if ("INVENTORY_FAILED".equals(event.getStatus())) {
+
+            order.setStatus(OrderStatus.CANCELLED);
+            orderRepository.save(order);
+
+            event.getFailedItems().forEach(item ->
+                    log.error("Product {} insufficient. Requested={}, Available={}",
+                            item.getProductId(),
+                            item.getRequestedQty(),
+                            item.getAvailableQty()));
         }
-        order.setStatus(OrderStatus.PAID);
-        orderRepository.save(order);
-        log.info("Order {} marked as Paid",paymentSuccessEvent.getOrderId());
-    }
-    @KafkaListener(topics = "payment-failed-topic",groupId = "order-group")
-    public void handlePaymentFailed(PaymentFailedEvent paymentFailedEvent) {
-        Order order = orderRepository.findById(paymentFailedEvent.getOrderId()).orElse(null);
-        if(order.getStatus()==OrderStatus.CANCELLED){
-            return;
+
+        else if ("INVENTORY_RESERVED".equals(event.getStatus())) {
+
+            order.setStatus(OrderStatus.PAYMENT_PENDING);
+            orderRepository.save(order);
+
+//            orderProducer.sendOrderCreatedEvent(order);
         }
-        order.setStatus(OrderStatus.CANCELLED);
-        orderRepository.save(order);
-        log.info("Order {} marked as cancelled",paymentFailedEvent.getOrderId());
     }
 }

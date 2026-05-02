@@ -7,6 +7,7 @@ import com.ecommerce.order_service.dto.OrderResponse;
 import com.ecommerce.order_service.entity.Order;
 import com.ecommerce.order_service.entity.OrderEnum.OrderStatus;
 import com.ecommerce.order_service.entity.OrderItem;
+import com.ecommerce.order_service.event.OrderEvent;
 import com.ecommerce.order_service.feing.CartClient;
 import com.ecommerce.order_service.kafka.OrderProducer;
 import com.ecommerce.order_service.mapper.OrderMapper;
@@ -28,38 +29,59 @@ public class OrderService {
     private final OrderProducer orderProducer;
 
     public OrderResponse createOrder(OrderRequest request) {
-        CartResponse cart= cartClient.getCart(request.getUserId());
-        if(cart.getItems().isEmpty()){
+
+        CartResponse cart = cartClient.getCart(request.getUserId());
+
+        if (cart.getItems().isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
-        List<OrderItem> items=new ArrayList<>();
-        BigDecimal total=BigDecimal.ZERO;
-        for(CartItemResponse item:cart.getItems()){
-            BigDecimal itemTotal=item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-            total=total.add(itemTotal);
+
+        List<OrderItem> items = new ArrayList<>();
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (CartItemResponse item : cart.getItems()) {
+
+            BigDecimal itemTotal = item.getPrice()
+                    .multiply(BigDecimal.valueOf(item.getQuantity()));
+
+            total = total.add(itemTotal);
+
             items.add(OrderItem.builder()
                     .productId(item.getProductId())
                     .productName(item.getProductName())
                     .price(item.getPrice())
                     .quantity(item.getQuantity())
-                    .build()
-            );
+                    .build());
         }
+
         Order order = Order.builder()
                 .userId(request.getUserId())
                 .items(items)
-                .status(OrderStatus.PAYMENT_PENDING)
+                .status(OrderStatus.CREATED)
                 .totalAmount(total)
                 .build();
+
         items.forEach(i -> i.setOrder(order));
-        orderRepository.save(order);
-        orderProducer.sendOrderCreatedEvent(order);
-        Order savedOrder=orderRepository.save(order);
 
+        Order saved = orderRepository.save(order);
 
-        return OrderMapper.toResponse(savedOrder);
+        OrderEvent event = OrderEvent.builder()
+                .orderId(saved.getId())
+                .status("CREATED")
+                .items(saved.getItems().stream().map(i -> {
+                    OrderEvent.Item e = new OrderEvent.Item();
+                    e.setProductId(i.getProductId());
+                    e.setQuantity(i.getQuantity());
+                    return e;
+                }).toList())
+                .build();
 
+        orderProducer.sendOrderEvent(event);
+
+        return OrderMapper.toResponse(saved); // ✅ FIXED
     }
+
+
 
     public OrderResponse getOrderById(UUID orderId) {
         Order order=orderRepository.findById(orderId)
