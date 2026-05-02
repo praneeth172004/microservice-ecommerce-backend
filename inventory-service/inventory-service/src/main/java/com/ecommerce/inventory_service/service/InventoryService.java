@@ -48,6 +48,7 @@ public class InventoryService {
         if (available < qty) {
             return false;
         }
+        inventory.setInitialStock(inventory.getInitialStock()-qty);
 
         inventory.setReservedStock(inventory.getReservedStock() + qty);
 
@@ -61,7 +62,7 @@ public class InventoryService {
         Inventory inventory = repository.findByProductId(productId)
                 .orElseThrow();
 
-        inventory.setInitialStock(inventory.getInitialStock() - qty);
+//        inventory.setInitialStock(inventory.getInitialStock() - qty);
         inventory.setReservedStock(inventory.getReservedStock() - qty);
 
         repository.save(inventory);
@@ -74,6 +75,7 @@ public class InventoryService {
                 .orElseThrow();
 
         inventory.setReservedStock(inventory.getReservedStock() - qty);
+        inventory.setInitialStock(inventory.getInitialStock() + qty);
 
         repository.save(inventory);
     }

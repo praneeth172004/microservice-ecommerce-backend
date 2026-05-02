@@ -25,7 +25,7 @@ public class InventoryConsumer {
         log.info("Inventory created for product {}", event.getProductId());
     }
 
-    @KafkaListener(topics = "order-event-topic", groupId = "inventory-group")
+    @KafkaListener(topics = "order-event-inventory-topic", groupId = "inventory-group")
     public void handleOrder(OrderEvent event) {
 
         log.info("Received order event {}", event.getOrderId());

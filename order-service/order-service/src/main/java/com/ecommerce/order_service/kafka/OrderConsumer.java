@@ -27,7 +27,7 @@ public class OrderConsumer {
 
         if ("INVENTORY_FAILED".equals(event.getStatus())) {
 
-            order.setStatus(OrderStatus.CANCELLED);
+            order.setStatus(OrderStatus.INVENTORY_FAILED);
             orderRepository.save(order);
 
             event.getFailedItems().forEach(item ->
@@ -42,7 +42,15 @@ public class OrderConsumer {
             order.setStatus(OrderStatus.PAYMENT_PENDING);
             orderRepository.save(order);
 
-//            orderProducer.sendOrderCreatedEvent(order);
+           orderProducer.sendOrderCreatedEvent(order);
         }
+    }
+    @KafkaListener(topics = "payment-success-topic",groupId = "order-group")
+    public void handlePaymentSuccess(PaymentSuccessEvent event) {
+        Order order = orderRepository.findById(event.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        order.setStatus(OrderStatus.PAID);
+        orderRepository.save(order);
+
     }
 }

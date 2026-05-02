@@ -10,22 +10,18 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class OrderProducer {
-    private final KafkaTemplate<String,OrderEvent> kafkaTemplate;
+    private final KafkaTemplate<String,Object> kafkaTemplate;
     public void sendOrderCreatedEvent(Order order){
-        OrderEvent event = OrderEvent.builder()
-                .orderId(order.getId())
-                .status("CREATED")
-                .items(order.getItems().stream().map(item -> {
-                    OrderEvent.Item i = new OrderEvent.Item();
-                    i.setProductId(item.getProductId());
-                    i.setQuantity(item.getQuantity());
-                    return i;
-                }).toList())
-                .build();
+        OrderCreatedEvent orderCreatedEvent = OrderCreatedEvent.builder()
+                        .orderId(order.getId())
+                                .userId(order.getUserId())
+                                        .amount(order.getTotalAmount())
+                                                .build();
 
-        kafkaTemplate.send("order-event-topic", order.getId().toString(), event);
+
+        kafkaTemplate.send("order-event-payment-topic", order.getId().toString(), orderCreatedEvent);
     }
     public void sendOrderEvent(OrderEvent event){
-        kafkaTemplate.send("order-event-topic",event.getOrderId().toString(),event);
+        kafkaTemplate.send("order-event-inventory-topic",event.getOrderId().toString(),event);
     }
 }

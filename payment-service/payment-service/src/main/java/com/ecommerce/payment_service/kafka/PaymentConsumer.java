@@ -13,7 +13,7 @@ public class PaymentConsumer {
 
     private final PaymentProducer paymentProducer;
 
-    @KafkaListener(topics = "order-created-topic", groupId = "payment-group")
+    @KafkaListener(topics = "order-event-payment-topic", groupId = "payment-group")
     public void handleOrderCreated(OrderCreatedEvent event) {
 
         log.info("Processing payment for order {}", event.getOrderId());
