@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -46,11 +49,36 @@ public class OrderConsumer {
         }
     }
     @KafkaListener(topics = "payment-success-topic",groupId = "order-group")
+    @Transactional
     public void handlePaymentSuccess(PaymentSuccessEvent event) {
         Order order = orderRepository.findById(event.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+        List<OrderEvent.Item> items=order.getItems().stream().map(i->{
+            OrderEvent.Item item = new OrderEvent.Item();
+            item.setProductId(i.getProductId());
+            item.setQuantity(i.getQuantity());
+            return item;
+        }).toList();
         order.setStatus(OrderStatus.PAID);
         orderRepository.save(order);
+        OrderEvent orderEvent = new OrderEvent();
+        orderEvent.setStatus("PAYMENT_SUCCESS");
+        orderEvent.setItems(items);
+        orderEvent.setPrice(order.getTotalAmount());
+        orderEvent.setOrderId(event.getOrderId());
+        orderProducer.sendNotification(orderEvent);
 
+    }
+    @KafkaListener(topics ="payment-failed-topic",groupId = "order-group")
+
+    public void handlePaymentFailed(PaymentFailedEvent event) {
+        Order order = orderRepository.findById(event.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+        OrderEvent orderEvent = new OrderEvent();
+        orderEvent.setStatus("PAYMENT_FAILED");
+        orderEvent.setOrderId(event.getOrderId());
+        orderProducer.sendNotification(orderEvent);
     }
 }

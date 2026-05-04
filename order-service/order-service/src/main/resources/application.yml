@@ -16,6 +16,7 @@ spring:
 
         spring.json.type.mapping: >
           com.ecommerce.payment_service.event.PaymentSuccessEvent:com.ecommerce.order_service.event.PaymentSuccessEvent,
+          com.ecommerce.payment_service.event.PaymentFailedEvent:com.ecommerce.order_service.event.PaymentFailedEvent,
           com.ecommerce.inventory_service.event.OrderEvent:com.ecommerce.order_service.event.OrderEvent
 
     producer:
