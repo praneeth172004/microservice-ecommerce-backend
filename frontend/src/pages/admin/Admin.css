@@ -1,0 +1,163 @@
+/* ====== Admin Shared Styles ====== */
+
+/* Stats grid */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.admin-stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.admin-stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.icon-primary  { background: var(--primary-light); color: var(--primary); }
+.icon-success  { background: rgba(16,185,129,0.15); color: var(--success); }
+.icon-danger   { background: rgba(239,68,68,0.15);  color: var(--danger); }
+.icon-warning  { background: rgba(245,158,11,0.15); color: var(--warning); }
+
+.admin-stat-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  font-family: var(--font-display);
+  line-height: 1;
+}
+.admin-stat-label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin: 4px 0 2px; }
+.admin-stat-sub { font-size: 0.72rem; color: var(--text-muted); }
+
+/* Quick links */
+.admin-quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.admin-quick-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.admin-quick-card:hover {
+  border-color: var(--primary);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+
+.admin-quick-left { display: flex; align-items: center; gap: var(--space-4); }
+
+.admin-quick-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius);
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-quick-card h3 { font-size: 0.95rem; font-weight: 700; }
+.admin-quick-card p  { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+.admin-recent { margin-top: var(--space-2); }
+
+/* Filters */
+.admin-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.filter-tabs { display: flex; gap: var(--space-2); }
+
+/* User cell */
+.user-cell { display: flex; align-items: center; gap: var(--space-3); }
+.user-cell-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+
+/* Product cell icon */
+.product-cell-icon {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Role select */
+.role-select {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-sans);
+}
+.role-select:focus { outline: none; border-color: var(--border-focus); }
+
+/* Modal */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h2 { font-size: 1.1rem; font-weight: 700; }
+
+.modal-form { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+/* Search box reuse */
+.search-box { position: relative; }
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.search-input { padding-left: 2.5rem; width: 100%; }
+
+@media (max-width: 1024px) { .admin-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) {
+  .admin-stats-grid { grid-template-columns: 1fr; }
+  .admin-quick-grid { grid-template-columns: 1fr; }
+}

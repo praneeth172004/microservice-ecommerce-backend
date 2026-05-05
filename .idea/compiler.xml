@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="apigateway" />
         <module name="serviceregistry" />
+        <module name="auth-service" />
       </profile>
       <profile name="Annotation profile for notification-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -21,8 +22,17 @@
         <module name="order-service" />
         <module name="inventory-service" />
         <module name="notification-service" />
-        <module name="productservice" />
         <module name="cartservice" />
+      </profile>
+      <profile name="Annotation profile for productservice" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="productservice" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -32,6 +42,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="apigateway" options="-parameters" />
+      <module name="auth-service" options="-parameters" />
       <module name="cartservice" options="-parameters" />
       <module name="inventory-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />

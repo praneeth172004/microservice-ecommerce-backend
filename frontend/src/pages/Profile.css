@@ -1,0 +1,110 @@
+.profile-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+.profile-info-card {
+  text-align: center;
+  position: sticky;
+  top: 80px;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+  margin: 0 auto var(--space-4);
+  box-shadow: var(--shadow-primary);
+}
+
+.profile-name { font-size: 1.2rem; font-weight: 700; margin-bottom: var(--space-2); }
+
+.profile-email, .profile-phone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-role-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+  margin-top: var(--space-4);
+}
+
+.profile-stat { text-align: center; }
+.stat-value { font-size: 0.9rem; font-weight: 700; }
+.stat-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Edit Form */
+.card-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-form { display: flex; flex-direction: column; gap: var(--space-4); }
+
+.profile-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: var(--space-2) 0;
+}
+.profile-divider::before,
+.profile-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Reuse input-icon-wrapper from Auth.css */
+.input-icon-wrapper { position: relative; }
+.input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.form-input.with-icon { padding-left: 2.5rem; }
+
+@media (max-width: 900px) {
+  .profile-layout { grid-template-columns: 1fr; }
+  .profile-info-card { position: static; }
+}

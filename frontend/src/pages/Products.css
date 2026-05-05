@@ -1,0 +1,103 @@
+.products-page { flex: 1; }
+
+.products-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.search-input { padding-left: 2.5rem; padding-right: 2.2rem; width: 100%; }
+.search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
+}
+.search-clear:hover { color: var(--text-primary); }
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.filter-select {
+  padding: 0.625rem 1rem;
+  min-width: 180px;
+  cursor: pointer;
+}
+
+/* Category tabs */
+.category-tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.category-tabs::-webkit-scrollbar { display: none; }
+
+.cat-tab {
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.83rem;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.cat-tab:hover { border-color: var(--primary); color: var(--primary); }
+.cat-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-primary);
+}
+
+/* Grid */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+}
+
+.load-more-row {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-8) 0 var(--space-4);
+}
+.load-more-btn { min-width: 160px; }
+
+@media (max-width: 1200px) { .products-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 900px)  { .products-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  {
+  .products-grid { grid-template-columns: 1fr; }
+  .products-filters { flex-direction: column; align-items: stretch; }
+}

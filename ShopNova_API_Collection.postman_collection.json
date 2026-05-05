@@ -1,0 +1,512 @@
+{
+  "info": {
+    "name": "ShopNova Microservices API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "productId", "value": "" },
+    { "key": "orderId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth Service",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"secret123\",\n  \"phone\": \"+91 98765 43210\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"tokenType\": \"Bearer\",\n  \"expiresIn\": 86400000,\n  \"user\": {\n    \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"email\": \"john@example.com\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"phone\": \"+91 98765 43210\",\n    \"role\": \"ROLE_CUSTOMER\",\n    \"active\": true,\n    \"createdAt\": \"2026-05-05T10:00:00\",\n    \"updatedAt\": \"2026-05-05T10:00:00\"\n  }\n}"
+            },
+            {
+              "name": "400 Email Exists",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{ \"status\": 400, \"message\": \"Email already registered: john@example.com\" }"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', json.refreshToken);",
+                  "pm.collectionVariables.set('userId', json.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"secret123\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"tokenType\": \"Bearer\",\n  \"expiresIn\": 86400000,\n  \"user\": {\n    \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"email\": \"john@example.com\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"role\": \"ROLE_CUSTOMER\",\n    \"active\": true\n  }\n}"
+            },
+            {
+              "name": "400 Wrong Credentials",
+              "status": "Bad Request",
+              "code": 400,
+              "body": "{ \"status\": 400, \"message\": \"Invalid email or password\" }"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/refresh",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"accessToken\": \"...\", \"refreshToken\": \"...\", \"tokenType\": \"Bearer\", \"expiresIn\": 86400000, \"user\": {...} }"
+            },
+            {
+              "name": "400 Invalid Token",
+              "code": 400,
+              "body": "{ \"status\": 400, \"message\": \"Refresh token is expired or revoked\" }"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          },
+          "response": [
+            { "name": "200 OK", "code": 200, "body": "\"Logged out successfully\"" }
+          ]
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"email\": \"john@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+91 98765 43210\",\n  \"role\": \"ROLE_CUSTOMER\",\n  \"active\": true,\n  \"createdAt\": \"2026-05-05T10:00:00\",\n  \"updatedAt\": \"2026-05-05T10:00:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/me",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Johnny\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+91 11111 22222\",\n  \"newPassword\": \"newSecret456\"\n}"
+            }
+          },
+          "response": [
+            { "name": "200 OK", "code": 200, "body": "{ ...updated UserResponse... }" }
+          ]
+        },
+        {
+          "name": "Admin — Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/admin/create",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Seller\",\n  \"email\": \"jane@shopnova.com\",\n  \"password\": \"seller123\",\n  \"phone\": \"+91 99999 00000\",\n  \"role\": \"ROLE_SELLER\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "code": 201,
+              "body": "{\n  \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"email\": \"jane@shopnova.com\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Seller\",\n  \"role\": \"ROLE_SELLER\",\n  \"active\": true,\n  \"createdAt\": \"2026-05-05T11:00:00\",\n  \"updatedAt\": \"2026-05-05T11:00:00\"\n}"
+            },
+            { "name": "403 Forbidden", "code": 403, "body": "{ \"status\": 403, \"message\": \"Access denied: insufficient permissions\" }" }
+          ]
+        },
+        {
+          "name": "Admin — List All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/auth/users"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": \"550e8400-...\",\n    \"email\": \"john@example.com\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"role\": \"ROLE_CUSTOMER\",\n    \"active\": true,\n    \"createdAt\": \"2026-05-05T10:00:00\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Admin — Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/auth/users/{{userId}}"
+          },
+          "response": [
+            { "name": "200 OK", "code": 200, "body": "{ ...UserResponse... }" },
+            { "name": "400 Not Found", "code": 400, "body": "{ \"status\": 400, \"message\": \"User not found with id: ...\" }" }
+          ]
+        },
+        {
+          "name": "Admin — Change User Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/users/{{userId}}/role",
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"role\": \"ROLE_SELLER\" }"
+            }
+          },
+          "response": [
+            { "name": "200 OK", "code": 200, "body": "{ ...updated UserResponse... }" }
+          ]
+        },
+        {
+          "name": "Admin — Toggle User Status",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/auth/users/{{userId}}/status"
+          },
+          "response": [
+            { "name": "200 OK — Deactivated", "code": 200, "body": "{ ...UserResponse with active: false... }" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📦 Product Service",
+      "item": [
+        {
+          "name": "Add Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/product/addProduct",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productName\": \"iPhone 16 Pro\",\n  \"description\": \"Apple flagship with A18 Pro chip\",\n  \"price\": 134900,\n  \"category\": \"Electronics\",\n  \"brand\": \"Apple\",\n  \"stockQuantity\": 50\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "code": 201,
+              "body": "{\n  \"id\": \"c9d8e7f6-b5a4-3210-fedc-ba9876543210\",\n  \"productName\": \"iPhone 16 Pro\",\n  \"description\": \"Apple flagship with A18 Pro chip\",\n  \"price\": 134900,\n  \"category\": \"Electronics\",\n  \"brand\": \"Apple\",\n  \"stockQuantity\": 50,\n  \"createdAt\": \"2026-05-05T10:00:00\",\n  \"updatedAt\": \"2026-05-05T10:00:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Product by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('productId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/product/getProductId/{{productId}}"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"id\": \"c9d8e7f6-b5a4-3210-fedc-ba9876543210\",\n  \"productName\": \"iPhone 16 Pro\",\n  \"price\": 134900,\n  \"category\": \"Electronics\",\n  \"brand\": \"Apple\",\n  \"stockQuantity\": 50,\n  \"createdAt\": \"2026-05-05T10:00:00\",\n  \"updatedAt\": \"2026-05-05T10:00:00\"\n}"
+            },
+            { "name": "404 Not Found", "code": 404, "body": "{ \"status\": 404, \"message\": \"Product not found\" }" }
+          ]
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/product/all?page=0&size=10",
+              "query": [
+                { "key": "page", "value": "0", "description": "0-indexed page number" },
+                { "key": "size", "value": "10", "description": "Items per page" }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": \"c9d8e7f6-...\",\n    \"productName\": \"iPhone 16 Pro\",\n    \"price\": 134900,\n    \"category\": \"Electronics\",\n    \"brand\": \"Apple\",\n    \"stockQuantity\": 50\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/product/update/{{productId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productName\": \"iPhone 16 Pro Max\",\n  \"price\": 149900,\n  \"stockQuantity\": 30\n}"
+            }
+          },
+          "response": [
+            { "name": "206 Partial Content", "code": 206, "body": "{ ...updated ProductResponse... }" }
+          ]
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/product/delete/{{productId}}"
+          },
+          "response": [
+            { "name": "200 OK", "code": 200, "body": "\"Product deleted successfully\"" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🛒 Cart Service",
+      "item": [
+        {
+          "name": "Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/cart/addCart/{{userId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 2\n    }\n  ]\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "code": 201,
+              "body": "{\n  \"id\": \"d1e2f3a4-b5c6-7890-abcd-ef1234567890\",\n  \"userId\": \"550e8400-...\",\n  \"items\": [\n    {\n      \"id\": \"aa11bb22-...\",\n      \"productId\": \"c9d8e7f6-...\",\n      \"productName\": \"iPhone 16 Pro\",\n      \"price\": 134900,\n      \"quantity\": 2,\n      \"subtotal\": 269800\n    }\n  ],\n  \"totalAmount\": 269800,\n  \"createdAt\": \"2026-05-05T10:30:00\",\n  \"updatedAt\": \"2026-05-05T10:30:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/cart/item/{{userId}}"
+          },
+          "response": [
+            { "name": "200 OK", "code": 200, "body": "{ ...CartResponse... }" }
+          ]
+        },
+        {
+          "name": "Update Cart Item Quantity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/cart/itemupdate/{{userId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 3\n}"
+            }
+          },
+          "response": [
+            { "name": "200 OK", "code": 200, "body": "{ ...updated CartResponse... }" }
+          ]
+        },
+        {
+          "name": "Remove Cart Item",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/cart/{{userId}}/item/{{productId}}"
+          },
+          "response": [
+            { "name": "200 OK", "code": 200, "body": "\"Item Deleted Successfully\"" }
+          ]
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/cart/{{userId}}"
+          },
+          "response": [
+            { "name": "200 OK", "code": 200, "body": "\"Deleted Successfully\"" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📋 Order Service",
+      "item": [
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "pm.collectionVariables.set('orderId', json.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/v1/orders",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "code": 201,
+              "body": "{\n  \"id\": \"f1a2b3c4-d5e6-7890-abcd-ef1234567890\",\n  \"userId\": \"550e8400-...\",\n  \"totalAmount\": 134900,\n  \"status\": \"PENDING\",\n  \"items\": [\n    {\n      \"id\": \"item-uuid\",\n      \"productId\": \"c9d8e7f6-...\",\n      \"quantity\": 1,\n      \"price\": 134900\n    }\n  ],\n  \"createdAt\": \"2026-05-05T11:00:00\",\n  \"updatedAt\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/orders/{{orderId}}"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"id\": \"f1a2b3c4-...\",\n  \"userId\": \"550e8400-...\",\n  \"totalAmount\": 134900,\n  \"status\": \"PAID\",\n  \"items\": [...],\n  \"createdAt\": \"2026-05-05T11:00:00\",\n  \"updatedAt\": \"2026-05-05T11:05:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Orders by User",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/orders/user/{{userId}}"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": \"f1a2b3c4-...\",\n    \"totalAmount\": 134900,\n    \"status\": \"PAID\",\n    \"items\": [...],\n    \"createdAt\": \"2026-05-05T11:00:00\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/orders/{{orderId}}/cancel"
+          },
+          "response": [
+            { "name": "200 OK", "code": 200, "body": "\"Order cancelled successfully\"" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🏭 Inventory Service",
+      "item": [
+        {
+          "name": "Get Inventory by Product ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/inventory/{{productId}}"
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"productId\": \"c9d8e7f6-b5a4-3210-fedc-ba9876543210\",\n  \"totalStock\": 50,\n  \"reservedStock\": 5,\n  \"availableStock\": 45\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
